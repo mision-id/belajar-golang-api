@@ -156,6 +156,7 @@ func getKategoriByID(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	http.Error(w, "Kategori tidak ditemukan", http.StatusNotFound)
 }
 
 // Fungsi menambahkan kategori
@@ -205,6 +206,7 @@ func updateKategoriByID(w http.ResponseWriter, r *http.Request) {
 			kategori[i] = UpdateKategori
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(kategori)
+			return
 		}
 	}
 	http.Error(w, "Kategori tidak ditemukan", http.StatusNotFound)
@@ -297,6 +299,14 @@ func main() {
 
 	//Buat route default untuk keterangan server running
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		//set jadi konsensus JSON
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"status": "Ok",
+		})
+	})
+
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		//set jadi konsensus JSON
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
