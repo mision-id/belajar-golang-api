@@ -47,6 +47,7 @@ func (r *CategoryRepository) GetByID(id int) (*models.Category, error) {
 
 	var c models.Category
 	err := row.Scan(&c.ID, &c.Name, &c.Description)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

@@ -15,7 +15,8 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 }
 
 func (r *ProductRepository) GetAll() ([]models.Product, error) {
-	query := "SELECT id, name, price, stock FROM products"
+	//query := "SELECT id, name, price, stock FROM products"
+	query := "SELECT p.id, p.name, p.price, p.stock, c.id, c.name, c.description FROM products p JOIN categories c ON p.category_id = c.id"
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -25,7 +26,8 @@ func (r *ProductRepository) GetAll() ([]models.Product, error) {
 	products := make([]models.Product, 0)
 	for rows.Next() {
 		var p models.Product
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock)
+		//err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock)
+		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock, &p.Category.ID, &p.Category.Name, &p.Category.Description)
 		if err != nil {
 			return nil, err
 		}
@@ -42,11 +44,19 @@ func (r *ProductRepository) CreateProduct(data models.Product) error {
 }
 
 func (r *ProductRepository) GetByID(id int) (*models.Product, error) {
-	query := "SELECT id, name, price, stock FROM products WHERE id = $1"
+	/*
+		query := "SELECT id, name, price, stock FROM products WHERE id = $1"
+		row := r.db.QueryRow(query, id)
+
+		var p models.Product
+		err := row.Scan(&p.ID, &p.Name, &p.Price, &p.Stock)
+	*/
+	query := "SELECT p.id, p.name, p.price, p.stock, c.id, c.name, c.description FROM products p JOIN categories c ON p.category_id = c.id WHERE p.id = $1"
 	row := r.db.QueryRow(query, id)
 
 	var p models.Product
-	err := row.Scan(&p.ID, &p.Name, &p.Price, &p.Stock)
+	err := row.Scan(&p.ID, &p.Name, &p.Price, &p.Stock, &p.Category.ID, &p.Category.Name, &p.Category.Description)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
