@@ -31,8 +31,11 @@ func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) 
 
 // function to show all products
 func (h *ProductHandler) getAll(w http.ResponseWriter, r *http.Request) {
-	products, err := h.service.GetAll()
+	name := r.URL.Query().Get("name")
+	products, err := h.service.GetAll(name)
 	if err != nil {
+		//enable for tshoot only
+		//http.Error(w, err.Error(), http.StatusNotFound)
 		http.Error(w, "Failed to retrieve products", http.StatusNotFound)
 		return
 	}

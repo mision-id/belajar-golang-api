@@ -57,15 +57,20 @@ func main() {
 	addr := "0.0.0.0:" + config.Port
 	fmt.Println("Server Running on ", addr)
 
-	//Endpoint route /api/v1/products
+	//Injection Endpoint /api/v1/products
 	productRepo := repositories.NewProductRepository(db)
 	ProductService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(ProductService)
 
-	//Endpoint route /api/v1/category
+	//Injection Endpoint /api/v1/category
 	categoryRepo := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+
+	//Injection Endpoint /api/v1/products
+	transactionRepo := repositories.NewTransactionRepository(db)
+	transactionService := services.NewTransactionService(transactionRepo)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
 	// Endpoint route /api/v1/products
 	http.HandleFunc("/api/v1/products", productHandler.HandleProducts)
@@ -74,6 +79,9 @@ func main() {
 	// Endpoint route /api/v1/categories
 	http.HandleFunc("/api/v1/categories", categoryHandler.HandleCategories)
 	http.HandleFunc("/api/v1/categories/", categoryHandler.HandleCategoriesByID)
+
+	// Endpoint route /api/v1/Checkout
+	http.HandleFunc("/api/v1/checkout", transactionHandler.Checkout)
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		//set jadi konsensus JSON
