@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"kasir-api/models"
+
+	"github.com/lib/pq"
 )
 
 type TransactionRepository struct {
@@ -64,16 +66,61 @@ func (r *TransactionRepository) CreateTransaction(items []models.CheckoutItems) 
 	}
 
 	//insert transcation
-	var transactionID int
-	err = tx.QueryRow("INSERT INTO transactions (total_amount) VALUES ($1) RETURNING ID", totalAmount).Scan(&transactionID)
+	/*
+		var transactionID int
+		err = tx.QueryRow("INSERT INTO transactions (total_amount) VALUES ($1) RETURNING ID", totalAmount).Scan(&transactionID)
+		if err != nil {
+			return nil, err
+		}
+		//insert transaction details
+		for i, detail := range details {
+			details[i].TransactionID = transactionID
+			_, err = tx.Exec("INSERT INTO transaction_details (transaction_id, product_id, quantity, subtotal) VALUES ($1,$2,$3,$4)", transactionID,
+				detail.ProductID, detail.Quantity, detail.Subtotal)
+			if err != nil {
+				return nil, err
+			}
+		}
+	*/
+	//perbaikan insert transaction details
+	var transactionID int64
+	err = tx.QueryRow(`INSERT INTO transactions (total_amount) VALUES ($1) RETURNING id`, totalAmount).Scan(&transactionID)
 	if err != nil {
 		return nil, err
 	}
-	//insert transaction details
-	for i, detail := range details {
-		details[i].TransactionID = transactionID
-		_, err = tx.Exec("INSERT INTO transaction_details (transaction_id, product_id, quantity, subtotal) VALUES ($1,$2,$3,$4)", transactionID,
-			detail.ProductID, detail.Quantity, detail.Subtotal)
+
+	//siapkan data loop tanpa INSERT
+	var (
+		productIDs []int
+		quantities []int
+		subtotals  []float64
+	)
+
+	for _, d := range details {
+		productIDs = append(productIDs, d.ProductID)
+		quantities = append(quantities, d.Quantity)
+		subtotals = append(subtotals, d.Subtotal)
+	}
+
+	if len(productIDs) > 0 {
+		_, err = tx.Exec(`
+		INSERT INTO transaction_details (
+			transaction_id,
+			product_id,
+			quantity,
+			subtotal
+		)
+		SELECT
+			$1,
+			unnest($2::int[]),
+			unnest($3::int[]),
+			unnest($4::numeric[])
+	`,
+			transactionID,
+			pq.Array(productIDs),
+			pq.Array(quantities),
+			pq.Array(subtotals),
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +131,7 @@ func (r *TransactionRepository) CreateTransaction(items []models.CheckoutItems) 
 	}
 
 	res = &models.Transaction{
-		ID:          transactionID,
+		ID:          int(transactionID),
 		TotalAmount: totalAmount,
 		Details:     details,
 	}
