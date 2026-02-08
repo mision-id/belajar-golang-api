@@ -72,6 +72,11 @@ func main() {
 	transactionService := services.NewTransactionService(transactionRepo)
 	transactionHandler := handlers.NewTransactionHandler(transactionService)
 
+	//Injection Endpoint /api/v1/report
+	reportRepo := repositories.NewReportRepository(db)
+	reportService := services.NewReportService(reportRepo)
+	reportHandler := handlers.NewReportHandler(reportService)
+
 	// Endpoint route /api/v1/products
 	http.HandleFunc("/api/v1/products", productHandler.HandleProducts)
 	http.HandleFunc("/api/v1/products/", productHandler.HandlerProductsByID)
@@ -80,8 +85,13 @@ func main() {
 	http.HandleFunc("/api/v1/categories", categoryHandler.HandleCategories)
 	http.HandleFunc("/api/v1/categories/", categoryHandler.HandleCategoriesByID)
 
-	// Endpoint route /api/v1/Checkout
+	// Endpoint route /api/v1/checkout
 	http.HandleFunc("/api/v1/checkout", transactionHandler.Checkout)
+
+	// Endpoint route /api/v1/report query param
+	http.HandleFunc("/api/v1/report", reportHandler.ReportByRange)
+	// Endpoint route /api/v1/report/today
+	http.HandleFunc("/api/v1/report/", reportHandler.DailyReport)
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		//set jadi konsensus JSON

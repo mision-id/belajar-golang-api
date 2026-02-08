@@ -44,9 +44,9 @@ func (r *TransactionRepository) CreateTransaction(items []models.CheckoutItems) 
 			return nil, err
 		}
 		//hitung current total = quantity * pricing
-		subotal := item.Quantity * price
+		subtotal := item.Quantity * price
 		//masukan kedalam subtotal
-		totalAmount += subotal
+		totalAmount += subtotal
 
 		//Kurangi jumlah stok nya
 		_, err = tx.Exec("UPDATE products SET stock = stock - $1 WHERE id = $2", item.Quantity, item.ProductID)
@@ -59,7 +59,7 @@ func (r *TransactionRepository) CreateTransaction(items []models.CheckoutItems) 
 			ProductName:  ProductName,
 			ProductPrice: price,
 			Quantity:     item.Quantity,
-			Subtotal:     subotal,
+			Subtotal:     float64(subtotal),
 		})
 	}
 

@@ -7,13 +7,13 @@ type Transaction struct {
 }
 
 type TransactionDetail struct {
-	ID            int    `json:"id"`
-	TransactionID int    `json:"transaction_id"`
-	ProductID     int    `json:"product_id"`
-	ProductName   string `json:"product_name"`
-	ProductPrice  int    `json:"product_price"`
-	Quantity      int    `json:"quantity"`
-	Subtotal      int    `json:"subtotal"`
+	ID            int     `json:"id"`
+	TransactionID int     `json:"transaction_id"`
+	ProductID     int     `json:"product_id"`
+	ProductName   string  `json:"product_name"`
+	ProductPrice  int     `json:"product_price"`
+	Quantity      int     `json:"quantity"`
+	Subtotal      float64 `json:"subtotal"`
 }
 
 type CheckoutItems struct {
