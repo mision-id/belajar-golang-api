@@ -4,7 +4,7 @@ import "net/http"
 
 func CORS(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origib", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Method", "OPTIONS,GET,POST,PUT,DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "X-API-Key, Content-Type")
 
