@@ -6,6 +6,7 @@ import (
 
 	"kasir-api/database"
 	"kasir-api/handlers"
+	"kasir-api/middlewares"
 	"kasir-api/repositories"
 	"kasir-api/services"
 	"net/http"
@@ -18,19 +19,7 @@ import (
 type Config struct {
 	Port   string `mapstructure:"PORT"`
 	DbConn string `mapstructure:"DB_CONNECTION"`
-}
-
-type Produk struct {
-	ID    int    `json:"id"`
-	Nama  string `json:"nama"`
-	Harga int    `json:"harga"`
-	Stok  int    `json:"stok"`
-}
-
-type Category struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	APIKey string `mapstructure:"API_KEY`
 }
 
 func main() {
@@ -44,6 +33,7 @@ func main() {
 	config := Config{
 		Port:   viper.GetString("PORT"),
 		DbConn: viper.GetString("DB_CONNECTION"),
+		APIKey: viper.GetString("API_KEY"),
 	}
 
 	//Setup Database
@@ -56,6 +46,8 @@ func main() {
 
 	addr := "0.0.0.0:" + config.Port
 	fmt.Println("Server Running on ", addr)
+
+	apiKeyMidlleware := middlewares.APIKey(config.APIKey)
 
 	//Injection Endpoint /api/v1/products
 	productRepo := repositories.NewProductRepository(db)
@@ -79,19 +71,19 @@ func main() {
 
 	// Endpoint route /api/v1/products
 	http.HandleFunc("/api/v1/products", productHandler.HandleProducts)
-	http.HandleFunc("/api/v1/products/", productHandler.HandlerProductsByID)
+	http.HandleFunc("/api/v1/products/", apiKeyMidlleware(productHandler.HandlerProductsByID))
 
 	// Endpoint route /api/v1/categories
 	http.HandleFunc("/api/v1/categories", categoryHandler.HandleCategories)
-	http.HandleFunc("/api/v1/categories/", categoryHandler.HandleCategoriesByID)
+	http.HandleFunc("/api/v1/categories/", apiKeyMidlleware(categoryHandler.HandleCategoriesByID))
 
 	// Endpoint route /api/v1/checkout
-	http.HandleFunc("/api/v1/checkout", transactionHandler.Checkout)
+	http.HandleFunc("/api/v1/checkout", apiKeyMidlleware(transactionHandler.Checkout))
 
 	// Endpoint route /api/v1/report query param
 	http.HandleFunc("/api/v1/report", reportHandler.ReportByRange)
 	// Endpoint route /api/v1/report/today
-	http.HandleFunc("/api/v1/report/", reportHandler.DailyReport)
+	http.HandleFunc("/api/v1/report/", apiKeyMidlleware(reportHandler.DailyReport))
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		//set jadi konsensus JSON
