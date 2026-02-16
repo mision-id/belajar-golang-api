@@ -70,20 +70,20 @@ func main() {
 	reportHandler := handlers.NewReportHandler(reportService)
 
 	// Endpoint route /api/v1/products
-	http.HandleFunc("/api/v1/products", middlewares.Logger(productHandler.HandleProducts))
-	http.HandleFunc("/api/v1/products/", middlewares.Logger(apiKeyMidlleware(productHandler.HandlerProductsByID)))
+	http.HandleFunc("/api/v1/products", middlewares.CORS(middlewares.Logger(productHandler.HandleProducts)))
+	http.HandleFunc("/api/v1/products/", middlewares.CORS(middlewares.Logger(apiKeyMidlleware(productHandler.HandlerProductsByID))))
 
 	// Endpoint route /api/v1/categories
-	http.HandleFunc("/api/v1/categories", middlewares.Logger(categoryHandler.HandleCategories))
-	http.HandleFunc("/api/v1/categories/", middlewares.Logger(apiKeyMidlleware(categoryHandler.HandleCategoriesByID)))
+	http.HandleFunc("/api/v1/categories", middlewares.CORS(middlewares.Logger(categoryHandler.HandleCategories)))
+	http.HandleFunc("/api/v1/categories/", middlewares.CORS(middlewares.Logger(apiKeyMidlleware(categoryHandler.HandleCategoriesByID))))
 
 	// Endpoint route /api/v1/checkout
-	http.HandleFunc("/api/v1/checkout", middlewares.Logger(apiKeyMidlleware(transactionHandler.Checkout)))
+	http.HandleFunc("/api/v1/checkout", middlewares.CORS(middlewares.Logger(apiKeyMidlleware(transactionHandler.Checkout))))
 
 	// Endpoint route /api/v1/report query param
-	http.HandleFunc("/api/v1/report", middlewares.Logger(reportHandler.ReportByRange))
+	http.HandleFunc("/api/v1/report", middlewares.CORS(middlewares.Logger(reportHandler.ReportByRange)))
 	// Endpoint route /api/v1/report/today
-	http.HandleFunc("/api/v1/report/", middlewares.Logger(apiKeyMidlleware(reportHandler.DailyReport)))
+	http.HandleFunc("/api/v1/report/", middlewares.CORS(middlewares.Logger(apiKeyMidlleware(reportHandler.DailyReport))))
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		//set jadi konsensus JSON
